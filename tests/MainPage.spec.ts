@@ -1,44 +1,111 @@
 import { test, expect } from '@playwright/test';
 
+interface Elements {
+  locator: (page: Page) => Locator;
+  name: string;
+  text?: string;
+  attribute?: {
+    type: string;
+    value: string;
+  };
+}
+
+const elements: Elements[] = [
+  { locator: (page: Page): Locator => page.getByRole('link', { name: 'Playwright logo Playwright' }), 
+  name: 'Playwright logo link' ,
+  text: 'Playwright',
+  attribute: {
+    type: 'href',
+    value: '/'
+  }
+},
+{ locator: (page: Page): Locator => page.getByRole('link', { name: 'Docs' }),
+  name: 'Docs link',
+  text: 'Docs',
+  attribute: {
+    type: 'href',
+    value: '/docs/intro'
+  }
+ },
+  { locator: (page: Page): Locator => page.getByRole('link', { name: 'MCP', exact: true }), 
+  name: 'MCP link',
+  text: 'MCP',
+  attribute: {
+    type: 'href',
+    value: '/mcp/introduction'
+  }
+ },
+{ locator: (page: Page): Locator => page.getByRole('link', { name: 'CLI', exact: true }) ,
+name: 'CLI link',
+text: 'CLI',
+attribute: {
+    type: 'href',
+    value: '/agent-cli/introduction'
+  }
+},
+{ locator: (page: Page): Locator => page.getByRole('link', { name: 'API' }) ,  
+  name: 'API link',
+  text: 'API',
+  attribute: {
+    type: 'href',
+    value: '/docs/api/class-playwright'
+  }
+},
+{ locator: (page: Page): Locator => page.getByRole('button', { name: 'Node.js' }) ,
+  name: 'Node.js button'  ,
+  text: 'Node.js',
+},
+{ locator: (page: Page): Locator => page.getByRole('link', { name: 'GitHub repository' }) ,
+  name: 'GitHub repository link',
+  attribute: {
+    type: 'href',
+    value: 'https://github.com/microsoft/playwright'
+  }
+},
+{ locator: (page: Page): Locator => page.getByRole('link', { name: 'Discord server' }) ,
+  name: 'Discord server link',
+  attribute: {
+    type: 'href',
+    value: 'https://aka.ms/playwright/discord'
+  }
+},
+{ locator: (page: Page): Locator => page.getByRole('button', { name: 'Switch between dark and light' }) ,
+  name: 'Switch between dark and light button',
+},
+{ locator: (page: Page): Locator => page.getByRole('button', { name: 'Search (Control+k)' }) ,
+  name: 'Search button', 
+},
+]
+
 test.describe('Main page tests', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('https://playwright.dev/');
   });
 test('Verification of header navigation element display', async ({ page }) => {
-  
-
-await expect.soft(page.getByRole('link', { name: 'Playwright logo Playwright' })).toBeVisible();
-await expect.soft(page.getByRole('link', { name: 'Docs' })).toBeVisible();
-await expect.soft(page.getByRole('link', { name: 'MCP', exact: true })).toBeVisible();
-await expect.soft(page.getByRole('link', { name: 'CLI', exact: true })).toBeVisible();
-await expect.soft(page.getByRole('link', { name: 'API' })).toBeVisible();
-await expect.soft(page.getByRole('button', { name: 'Node.js' })).toBeVisible();
-await expect.soft(page.getByRole('link', { name: 'GitHub repository' })).toBeVisible();
-await expect.soft(page.getByRole('link', { name: 'Discord server' })).toBeVisible();
-await expect.soft(page.getByRole('button', { name: 'Switch between dark and light' })).toBeVisible();
-await expect.soft(page.getByRole('button', { name: 'Search (Control+k)' })).toBeVisible();
-});
+  elements.forEach(({ locator, name }) => {
+     test.step(`Verification element visibility ${name}`, async () => {
+    await expect.soft(locator(page)).toBeVisible();
+  });
+  });
+ });
 test('Verification of header navigation element names', async ({ page }) => {
-
-  await expect.soft(page.getByRole('link', { name: 'Playwright logo Playwright' })).toContainText('Playwright');
-  await expect.soft(page.getByRole('link', { name: 'Docs' })).toContainText('Docs');
-  await expect.soft(page.getByRole('link', { name: 'MCP', exact: true })).toContainText('MCP');
-  await expect.soft(page.getByRole('link', { name: 'CLI', exact: true })).toContainText('CLI');
-  await expect.soft(page.getByRole('link', { name: 'API' })).toContainText('API');
-  await expect.soft(page.getByRole('button', { name: 'Node.js' })).toContainText('Node.js');
+ elements.forEach(({locator, name, text}) => {
+  if (text) {
+   test.step(`Verification element text ${name}`, async () => {
+    await expect.soft(locator(page)).toContainText(text);
+   });
+  }
+  });
+})
  
-
-});
 test('Verification of header navigation element attributes href', async ({ page }) => {
- 
-  await expect.soft(page.getByRole('link', { name: 'Playwright logo Playwright' })).toHaveAttribute('href', '/');
-  await expect.soft(page.getByRole('link', { name: 'Docs' })).toHaveAttribute('href', '/docs/intro');
-  await expect.soft(page.getByRole('link', { name: 'MCP', exact: true })).toHaveAttribute('href', '/mcp/introduction');
-  await expect.soft(page.getByRole('link', { name: 'CLI', exact: true })).toHaveAttribute('href', '/agent-cli/introduction');
-  await expect.soft(page.getByRole('link', { name: 'API' })).toHaveAttribute('href', '/docs/api/class-playwright');
-  await expect.soft(page.getByRole('link', { name: 'GitHub repository' })).toHaveAttribute('href', 'https://github.com/microsoft/playwright');
-  await expect.soft(page.getByRole('link', { name: 'Discord server' })).toHaveAttribute('href', 'https://aka.ms/playwright/discord');
- 
+  elements.forEach(({locator, name, attribute}) => {
+  if (attribute) {
+   test.step(`Verification attribute href ${name}`, async () => {
+    await expect.soft(locator(page)).toHaveAttribute(attribute?.type, attribute?.value);
+   });
+  }
+  });
 
 });
 test('Light mode switching check', async ({ page }) => {
