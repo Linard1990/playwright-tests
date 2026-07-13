@@ -87,7 +87,9 @@ attribute: {
     value: '/docs/intro'
   }
 },
-]
+];
+
+const lightMods = ['light','dark']
 
 test.describe('Main page tests', () => {
   test.beforeEach(async ({ page }) => {
@@ -108,7 +110,7 @@ test('Verification of header navigation element names', async ({ page }) => {
    });
   }
   });
-})
+});
  
 test('Verification of header navigation element attributes href', async ({ page }) => {
   elements.forEach(({locator, name, attribute}) => {
@@ -121,8 +123,15 @@ test('Verification of header navigation element attributes href', async ({ page 
 
 });
 test('Light mode switching check', async ({ page }) => {
-  
  await page.getByRole('button', { name: 'Switch between dark and light' }).click();
  await expect.soft(page.locator('html')).toHaveAttribute('data-theme', 'light');
  });
+ lightMods.forEach((value) => {
+  test(`Checking the styles of active ${value} mode`, async ({page}) => {
+    await page.evaluate((value) => {
+      document.querySelector('html')?.setAttribute('data-theme', value);
+    }, value);
+    await expect(page).toHaveScreenshot(`pageWith${value}Mode.png`);
+  });
 });
+  });
